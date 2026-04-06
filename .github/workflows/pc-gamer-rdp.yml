@@ -1,0 +1,319 @@
+name: "PC Gamer Virtual - Windows RDP"
+
+on:
+  workflow_dispatch:
+    inputs:
+      rdp_password:
+        description: "Senha para o RDP (mínimo 8 caracteres)"
+        required: true
+        default: "GamerPC@2026!"
+        type: string
+      install_steam:
+        description: "Instalar Steam?"
+        required: false
+        default: true
+        type: boolean
+      install_epicgames:
+        description: "Instalar Epic Games Launcher?"
+        required: false
+        default: false
+        type: boolean
+      install_chrome:
+        description: "Instalar Google Chrome?"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  pc-gamer:
+    name: "PC Gamer Virtual RDP"
+    runs-on: windows-latest
+    timeout-minutes: 360
+
+    steps:
+      # ============================================
+      # PASSO 1: Informações do Sistema
+      # ============================================
+      - name: "Exibir Especificações do PC Virtual"
+        run: |
+          Write-Host "============================================"
+          Write-Host "   PC GAMER VIRTUAL - ESPECIFICACOES"
+          Write-Host "============================================"
+          Write-Host ""
+          Write-Host "CPU:"
+          Get-WmiObject Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors | Format-List
+          Write-Host "RAM:"
+          $ram = (Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1GB
+          Write-Host "  Total: $([math]::Round($ram, 2)) GB"
+          Write-Host ""
+          Write-Host "DISCO:"
+          Get-WmiObject Win32_LogicalDisk | Select-Object DeviceID, @{N='Size(GB)';E={[math]::Round($_.Size/1GB,2)}}, @{N='Free(GB)';E={[math]::Round($_.FreeSpace/1GB,2)}} | Format-Table
+          Write-Host ""
+          Write-Host "SISTEMA OPERACIONAL:"
+          (Get-WmiObject Win32_OperatingSystem).Caption
+          Write-Host ""
+          Write-Host "============================================"
+
+      # ============================================
+      # PASSO 2: Otimizações de Performance Gaming
+      # ============================================
+      - name: "Aplicar Otimizações de Performance Gaming"
+        run: |
+          Write-Host "Aplicando otimizacoes de performance gaming..."
+
+          # Desabilitar Windows Defender em tempo real (libera CPU)
+          Set-MpPreference -DisableRealtimeMonitoring $true -ErrorAction SilentlyContinue
+          Write-Host "[OK] Windows Defender tempo real desabilitado"
+
+          # Definir plano de energia para Alta Performance
+          powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+          Write-Host "[OK] Plano de energia: Alta Performance"
+
+          # Desabilitar efeitos visuais desnecessários
+          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -ErrorAction SilentlyContinue
+          Write-Host "[OK] Efeitos visuais otimizados"
+
+          # Desabilitar serviços desnecessários para gaming
+          $services = @(
+            "WSearch",          # Windows Search
+            "SysMain",          # Superfetch
+            "DiagTrack",        # Telemetria
+            "dmwappushservice",  # WAP Push
+            "MapsBroker",       # Mapas
+            "lfsvc",            # Geolocalização
+            "RetailDemo"        # Demo de varejo
+          )
+          foreach ($svc in $services) {
+            Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
+            Set-Service -Name $svc -StartupType Disabled -ErrorAction SilentlyContinue
+          }
+          Write-Host "[OK] Servicos desnecessarios desabilitados"
+
+          # Otimizar configurações de rede
+          netsh int tcp set global autotuninglevel=normal
+          netsh int tcp set global chimney=enabled 2>$null
+          netsh int tcp set global dca=enabled 2>$null
+          netsh int tcp set global netdma=enabled 2>$null
+          Write-Host "[OK] Rede otimizada"
+
+          # Desabilitar Nagle's Algorithm (reduz latência)
+          $adapters = Get-ChildItem "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces"
+          foreach ($adapter in $adapters) {
+            Set-ItemProperty -Path $adapter.PSPath -Name "TcpAckFrequency" -Value 1 -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path $adapter.PSPath -Name "TCPNoDelay" -Value 1 -ErrorAction SilentlyContinue
+          }
+          Write-Host "[OK] Nagle's Algorithm desabilitado (menor latencia)"
+
+          # Prioridade de GPU para aplicações
+          New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Force | Out-Null
+          Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "GPU Priority" -Value 8
+          Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "Priority" -Value 6
+          Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" -Name "Scheduling Category" -Value "High"
+          Write-Host "[OK] Prioridade GPU para games configurada"
+
+          # Aumentar prioridade de processos em primeiro plano
+          Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl" -Name "Win32PrioritySeparation" -Value 38
+          Write-Host "[OK] Prioridade de processos otimizada"
+
+          # Limpar arquivos temporários para liberar espaço
+          Remove-Item -Path "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "C:\Windows\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+          Write-Host "[OK] Arquivos temporarios limpos"
+
+          Write-Host ""
+          Write-Host "Todas as otimizacoes de gaming foram aplicadas!"
+
+      # ============================================
+      # PASSO 3: Otimizar RDP para Gaming
+      # ============================================
+      - name: "Otimizar RDP para Máxima Performance"
+        run: |
+          Write-Host "Otimizando RDP para gaming..."
+
+          # Habilitar Remote Desktop
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
+          Write-Host "[OK] Remote Desktop habilitado"
+
+          # Configurações avançadas de RDP para gaming
+          # Máxima qualidade de cor (32-bit)
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "ColorDepth" -Value 5
+          Write-Host "[OK] Profundidade de cor: 32-bit"
+
+          # Habilitar compressão de dados
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "fDisableEncryption" -Value 0
+          Write-Host "[OK] Criptografia habilitada"
+
+          # Configurar política de grupo para melhor performance RDP
+          $rdpPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+          New-Item -Path $rdpPath -Force | Out-Null
+
+          # Habilitar H.264/AVC hardware encoding
+          Set-ItemProperty -Path $rdpPath -Name "AVC444ModePreferred" -Value 1
+          Set-ItemProperty -Path $rdpPath -Name "AVCHardwareEncodePreferred" -Value 1
+          Write-Host "[OK] H.264/AVC encoding habilitado"
+
+          # Configurar taxa de frames máxima (60 FPS)
+          Set-ItemProperty -Path $rdpPath -Name "MaxFrameRate" -Value 60 -Type DWord -Force
+          Write-Host "[OK] Taxa de frames maxima: 60 FPS"
+
+          # Habilitar UDP para RDP (menor latência)
+          Set-ItemProperty -Path $rdpPath -Name "SelectTransport" -Value 0
+          Write-Host "[OK] Transporte UDP habilitado"
+
+          # Desabilitar limitação de banda
+          Set-ItemProperty -Path $rdpPath -Name "MaxBandwidth" -Value 0 -Type DWord -Force
+          Write-Host "[OK] Limitacao de banda removida"
+
+          # Configurar prioridade visual
+          Set-ItemProperty -Path $rdpPath -Name "VisualExperiencePolicy" -Value 1
+          Write-Host "[OK] Experiencia visual otimizada"
+
+          # Habilitar RemoteFX
+          $rfxPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\Client"
+          New-Item -Path $rfxPath -Force | Out-Null
+          Set-ItemProperty -Path $rfxPath -Name "EnableHardwareMode" -Value 1
+          Write-Host "[OK] RemoteFX habilitado"
+
+          Write-Host ""
+          Write-Host "RDP otimizado para gaming com sucesso!"
+
+      # ============================================
+      # PASSO 4: Definir Senha do Usuário
+      # ============================================
+      - name: "Configurar Usuário e Senha"
+        run: |
+          Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "${{ github.event.inputs.rdp_password }}" -Force)
+          Write-Host "[OK] Senha do usuario 'runneradmin' configurada"
+          Write-Host ""
+          Write-Host "============================================"
+          Write-Host "  CREDENCIAIS DE ACESSO"
+          Write-Host "============================================"
+          Write-Host "  Usuario: runneradmin"
+          Write-Host "  Senha: (definida no input do workflow)"
+          Write-Host "============================================"
+
+      # ============================================
+      # PASSO 5: Instalar Google Chrome
+      # ============================================
+      - name: "Instalar Google Chrome"
+        if: ${{ github.event.inputs.install_chrome == 'true' }}
+        run: |
+          Write-Host "Instalando Google Chrome..."
+          $chromeUrl = "https://dl.google.com/chrome/install/latest/chrome_installer.exe"
+          Invoke-WebRequest -Uri $chromeUrl -OutFile "$env:TEMP\chrome_installer.exe"
+          Start-Process -FilePath "$env:TEMP\chrome_installer.exe" -Args "/silent /install" -Wait
+          Write-Host "[OK] Google Chrome instalado"
+
+      # ============================================
+      # PASSO 6: Instalar Steam
+      # ============================================
+      - name: "Instalar Steam"
+        if: ${{ github.event.inputs.install_steam == 'true' }}
+        run: |
+          Write-Host "Baixando e instalando Steam..."
+          $steamUrl = "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe"
+          Invoke-WebRequest -Uri $steamUrl -OutFile "$env:TEMP\SteamSetup.exe"
+          Start-Process -FilePath "$env:TEMP\SteamSetup.exe" -Args "/S" -Wait
+          Write-Host "[OK] Steam instalado"
+
+      # ============================================
+      # PASSO 7: Instalar Epic Games
+      # ============================================
+      - name: "Instalar Epic Games Launcher"
+        if: ${{ github.event.inputs.install_epicgames == 'true' }}
+        run: |
+          Write-Host "Baixando e instalando Epic Games Launcher..."
+          $epicUrl = "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.msi"
+          Invoke-WebRequest -Uri $epicUrl -OutFile "$env:TEMP\EpicInstaller.msi"
+          Start-Process msiexec.exe -Args "/i $env:TEMP\EpicInstaller.msi /quiet" -Wait
+          Write-Host "[OK] Epic Games Launcher instalado"
+
+      # ============================================
+      # PASSO 8: Instalar Software Adicional Gaming
+      # ============================================
+      - name: "Instalar Software Adicional"
+        run: |
+          Write-Host "Instalando software adicional para gaming..."
+
+          # Instalar DirectX Runtime
+          Write-Host "Instalando DirectX..."
+          Invoke-WebRequest -Uri "https://download.microsoft.com/download/1/7/1/1718CCC4-6315-4D8E-9543-8E28A4E18C4C/dxwebsetup.exe" -OutFile "$env:TEMP\dxwebsetup.exe" -ErrorAction SilentlyContinue
+          Start-Process -FilePath "$env:TEMP\dxwebsetup.exe" -Args "/Q" -Wait -ErrorAction SilentlyContinue
+          Write-Host "[OK] DirectX Runtime"
+
+          # Instalar Visual C++ Redistributables
+          Write-Host "Instalando Visual C++ Redistributables..."
+          Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile "$env:TEMP\vc_redist.x64.exe"
+          Start-Process -FilePath "$env:TEMP\vc_redist.x64.exe" -Args "/install /quiet /norestart" -Wait
+          Write-Host "[OK] Visual C++ Redistributable x64"
+
+          Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vc_redist.x86.exe" -OutFile "$env:TEMP\vc_redist.x86.exe"
+          Start-Process -FilePath "$env:TEMP\vc_redist.x86.exe" -Args "/install /quiet /norestart" -Wait
+          Write-Host "[OK] Visual C++ Redistributable x86"
+
+          # Instalar .NET Runtime
+          Write-Host "Instalando .NET Runtime..."
+          Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "$env:TEMP\dotnet-install.ps1"
+          & "$env:TEMP\dotnet-install.ps1" -Channel 8.0 -Runtime dotnet -ErrorAction SilentlyContinue
+          Write-Host "[OK] .NET Runtime"
+
+          # Instalar 7-Zip
+          Write-Host "Instalando 7-Zip..."
+          Invoke-WebRequest -Uri "https://www.7-zip.org/a/7z2301-x64.exe" -OutFile "$env:TEMP\7zip.exe"
+          Start-Process -FilePath "$env:TEMP\7zip.exe" -Args "/S" -Wait
+          Write-Host "[OK] 7-Zip instalado"
+
+          Write-Host ""
+          Write-Host "Todo software adicional instalado com sucesso!"
+
+      # ============================================
+      # PASSO 9: Configurar Ngrok e Criar Túnel RDP
+      # ============================================
+      - name: "Baixar e Configurar Ngrok"
+        run: |
+          Write-Host "Baixando ngrok..."
+          Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
+          Expand-Archive ngrok.zip -DestinationPath ngrok -Force
+          Write-Host "[OK] Ngrok baixado e extraido"
+
+      - name: "Autenticar Ngrok"
+        run: .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
+        env:
+          NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      # ============================================
+      # PASSO 10: Exibir Informações e Iniciar Túnel
+      # ============================================
+      - name: "Informações Finais e Iniciar Túnel RDP"
+        run: |
+          Write-Host ""
+          Write-Host "============================================"
+          Write-Host "   PC GAMER VIRTUAL - PRONTO!"
+          Write-Host "============================================"
+          Write-Host ""
+          Write-Host "  CREDENCIAIS:"
+          Write-Host "  Usuario: runneradmin"
+          Write-Host "  Senha: (definida no input)"
+          Write-Host ""
+          Write-Host "  COMO CONECTAR:"
+          Write-Host "  1. Abra 'Conexao de Area de Trabalho Remota'"
+          Write-Host "  2. Use o endereco TCP do ngrok (veja abaixo)"
+          Write-Host "  3. Digite usuario e senha"
+          Write-Host ""
+          Write-Host "  SPECS DO PC:"
+          Write-Host "  - 4 vCPUs"
+          Write-Host "  - 16 GB RAM"
+          Write-Host "  - 14 GB SSD"
+          Write-Host "  - Internet Ultra-Rapida"
+          Write-Host "  - Windows otimizado para Gaming"
+          Write-Host ""
+          Write-Host "  DURACAO MAXIMA: 6 horas"
+          Write-Host ""
+          Write-Host "  Iniciando tunel ngrok..."
+          Write-Host "  O endereco TCP aparecera abaixo:"
+          Write-Host "============================================"
+          Write-Host ""
+
+          .\ngrok\ngrok.exe tcp 3389
