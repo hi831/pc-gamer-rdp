@@ -1,0 +1,19 @@
+name: Teste do GitHub Actions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  teste:
+    runs-on: windows-latest
+    steps:
+      - name: Informacoes do sistema
+        shell: pwsh
+        run: |
+          Write-Host "GitHub Actions funcionando!"
+          Write-Host "Sistema:"
+          Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Version
+          Write-Host "Processador:"
+          Get-CimInstance Win32_Processor | Select-Object Name
+          Write-Host "Memoria:"
+          Get-CimInstance Win32_ComputerSystem | Select-Object TotalPhysicalMemory
