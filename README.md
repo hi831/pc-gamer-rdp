@@ -10,7 +10,7 @@ Este fork organiza um projeto de streaming de jogos em um computador próprio ou
 - [**Guia completo**](docs/COMO-USAR.md) — preparar servidor Windows e cliente.
 - [**Arquitetura**](docs/ARQUITETURA.md) — onde ficam CPU, GPU, disco e GitHub.
 - [**Segurança**](docs/SEGURANCA.md) — não publique credenciais ou portas de administração.
-- [**Executar diagnósticos existentes**](../../actions) — não ativam um PC gamer.
+- [**Executar diagnósticos existentes**](https://github.com/hi831/pc-gamer-rdp/actions) — não ativam um PC gamer.
 
 Para publicar o painel com endereço web, abra **Settings → Pages → Build and deployment → Deploy from a branch → main /docs → Save**. Depois de a publicação terminar, acesse https://hi831.github.io/pc-gamer-rdp/ . A publicação pode depender das configurações da conta e do repositório. O painel é estático: não acessa um PC real sozinho.
 
