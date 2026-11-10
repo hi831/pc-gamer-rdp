@@ -1,0 +1,35 @@
+name: Diagnostico Windows
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/diagnostico.yml'
+jobs:
+  diagnostico:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Verificar ambiente
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path relatorios | Out-Null
+          "Data: $(Get-Date -Format o)" | Out-File relatorios/ambiente.txt
+          "Sistema operacional:" | Out-File relatorios/ambiente.txt -Append
+          Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,OSArchitecture | Format-List | Out-String | Out-File relatorios/ambiente.txt -Append
+          "CPU:" | Out-File relatorios/ambiente.txt -Append
+          Get-CimInstance Win32_Processor | Select-Object Name,NumberOfLogicalProcessors | Format-List | Out-String | Out-File relatorios/ambiente.txt -Append
+          "RAM:" | Out-File relatorios/ambiente.txt -Append
+          Get-CimInstance Win32_ComputerSystem | Select-Object TotalPhysicalMemory | Format-List | Out-String | Out-File relatorios/ambiente.txt -Append
+          "GPU:" | Out-File relatorios/ambiente.txt -Append
+          Get-CimInstance Win32_VideoController | Select-Object Name,AdapterRAM | Format-List | Out-String | Out-File relatorios/ambiente.txt -Append
+          "Discos:" | Out-File relatorios/ambiente.txt -Append
+          Get-PSDrive -PSProvider FileSystem | Select-Object Name,Used,Free | Format-Table | Out-String | Out-File relatorios/ambiente.txt -Append
+          Get-Content relatorios/ambiente.txt
+      - name: Publicar relatorio
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostico-windows
+          path: relatorios/ambiente.txt
+          retention-days: 7
