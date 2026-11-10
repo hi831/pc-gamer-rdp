@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1022">
+<meta name="description" content="Central de controle do projeto PC Gamer Cloud — documentação, diagnósticos e preparação segura de servidor de streaming.">
+<title>PC Gamer Cloud • Central</title>
+<style>
+:root{color-scheme:dark;--bg:#090d19;--panel:#11192a;--panel2:#172239;--line:#29334b;--text:#f0f5ff;--muted:#a6b5cf;--accent:#8b79ff;--blue:#54c4ff;--green:#6ce3bb}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 80% -10%,#22265b 0,transparent 45%),radial-gradient(ellipse at 0% 20%,#123452 0,transparent 30%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif;min-height:100vh}
+a{color:inherit;text-decoration:none}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
+header{border-bottom:1px solid #ffffff1a;background:#090d19bd;backdrop-filter:blur(16px);position:sticky;top:0;z-index:5}
+.nav{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:12px;font-weight:850;letter-spacing:.3px}
+.logo{width:39px;height:39px;border:1px solid #9889ff80;border-radius:12px;background:linear-gradient(145deg,#7d65ff,#2e84cc);display:grid;place-items:center;font-size:21px;box-shadow:0 0 32px #7d65ff44}
+.navlinks{display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:14px}.navlinks a:hover{color:var(--text)}
+.hero{padding:74px 0 56px;display:grid;grid-template-columns:1.2fr .8fr;gap:34px;align-items:center}
+.eyebrow{color:#bdadff;font-size:12px;text-transform:uppercase;letter-spacing:2.4px;font-weight:800;margin-bottom:18px}
+h1{font-size:clamp(42px,6vw,72px);line-height:1.06;letter-spacing:-3px;margin:0 0 23px}h1 span{background:linear-gradient(105deg,#eae5ff 10%,#8f7bff 65%,#5fcbff);background-clip:text;-webkit-text-fill-color:transparent}
+.lead{font-size:17px;line-height:1.75;color:var(--muted);max-width:630px;margin:0 0 27px}.actions{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;gap:9px;justify-content:center;align-items:center;padding:13px 17px;border-radius:11px;background:#1c2943;color:#eef3ff;border:1px solid #4a5873;font-size:14px;font-weight:750;transition:transform .15s,background .15s;cursor:pointer}.btn:hover{transform:translateY(-2px);background:#273858}
+.btn.primary{background:linear-gradient(100deg,#806dff,#5478f8);border-color:#8a84ff;color:white;box-shadow:0 12px 36px #7164ff33}
+.orbit{min-height:310px;border-radius:26px;display:grid;place-items:center;position:relative;border:1px solid #ffffff24;background:linear-gradient(145deg,#1a2445,#10172b 75%);overflow:hidden;box-shadow:0 20px 70px #0005}
+.orbit:before{content:"";position:absolute;width:330px;height:330px;border:1px solid #b0a8ff25;border-radius:50%;box-shadow:0 0 0 48px #837bff09,0 0 0 100px #837bff07}
+.monitor{position:relative;z-index:1;width:75%;padding:12px;background:#090e1a;border:1px solid #545a91;border-radius:16px;box-shadow:0 15px 70px #0007}
+.screen{background:radial-gradient(circle at 75% 35%,#7151cf88,transparent 40%),linear-gradient(125deg,#142d4b,#1b1642);height:150px;border-radius:9px;padding:17px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px}
+.windowline{height:7px;background:#c4d5ff9c;border-radius:9px;width:55%}.windowline.small{width:33%;background:#6ce3bb}.stand{height:25px;width:30%;margin:auto;border-bottom:9px solid #51587b;border-radius:3px}
+.chip{position:absolute;right:13px;top:14px;border:1px solid #7b8aff83;border-radius:7px;background:#171b36;padding:7px;font-size:11px;color:#bac5ef}
+.pill{font-size:12px;border-radius:999px;display:inline-flex;gap:8px;align-items:center;padding:7px 11px;background:#5b89ce1c;border:1px solid #5b89ce66;color:#b5d6ff}.dot{width:7px;height:7px;background:#72d1ff;border-radius:99px}
+.notice{padding:16px 18px;border:1px solid #6a609c65;background:#6a609c1c;border-radius:13px;color:#d6ceff;line-height:1.6;font-size:14px;margin-bottom:29px}
+.section{padding:24px 0 55px}.section-head{display:flex;justify-content:space-between;gap:12px;align-items:end;margin-bottom:18px;flex-wrap:wrap}.section h2{font-size:27px;letter-spacing:-.7px;margin:0}.section .sub{color:var(--muted);font-size:14px;margin:7px 0 0;line-height:1.6}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.card{padding:23px;border:1px solid var(--line);background:linear-gradient(140deg,#151f35,#111827);border-radius:18px;min-width:0}
+.card .icon{height:40px;width:40px;border-radius:11px;background:#7575fb28;display:grid;place-items:center;font-size:22px;margin-bottom:18px}.card h3{font-size:16px;margin:0 0 8px}.card p{color:var(--muted);font-size:14px;line-height:1.65;margin:0 0 16px}.card a{font-size:13px;color:#aaa2ff;font-weight:700}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}.panel{border:1px solid var(--line);background:var(--panel);padding:24px;border-radius:18px}
+.progress{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;margin-bottom:9px}.track{height:8px;background:#2b3046;border-radius:99px;overflow:hidden;margin-bottom:21px}.fill{height:100%;width:0;background:linear-gradient(90deg,#6d7afc,#65d8d4);border-radius:99px;transition:width .3s}
+.check{display:flex;gap:13px;align-items:flex-start;padding:13px 0;border-bottom:1px solid #ffffff13;color:#d9e1f5;font-size:14px;line-height:1.55}.check:last-child{border-bottom:0}.check input{margin-top:3px;accent-color:#8c7cff;width:18px;height:18px;flex-shrink:0}
+.status{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#1b2840;border-radius:12px;padding:14px 16px;margin-bottom:12px}.status strong{font-size:13px}.status span{font-size:12px;color:#b3c2da}.status .em{color:#f6d18d}
+.step{display:flex;gap:11px;align-items:flex-start;margin-top:16px}.step .number{display:grid;place-items:center;min-width:24px;height:24px;border-radius:50%;border:1px solid #7b6afe;color:#c3baff;font-size:12px;font-weight:700}.step div{font-size:14px;color:var(--muted);line-height:1.6}.step strong{color:#f3f6ff}
+footer{border-top:1px solid var(--line);padding:25px 0 35px;color:var(--muted);font-size:13px}.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+@media(max-width:850px){.hero,.grid2{grid-template-columns:1fr}.hero{padding-top:44px}.orbit{min-height:260px}.cards{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.cards{grid-template-columns:1fr}.nav{padding:14px 0}.hero{gap:22px}h1{letter-spacing:-2px}.orbit{min-height:230px}.container{padding:0 17px}.panel{padding:19px}}
+</style>
+</head>
+<body>
+<header><div class="container nav"><a class="brand" href="./" aria-label="Início PC Gamer Cloud"><span class="logo" aria-hidden="true">⌘</span>PC GAMER <span style="color:#9c8aff">CLOUD</span></a><nav class="navlinks" aria-label="Navegação"><a href="#etapas">Configuração</a><a href="#ferramentas">Ferramentas</a><a href="#diagnostico">Diagnóstico</a><a href="COMO-USAR.md">Guia</a><a href="https://github.com/hi831/pc-gamer-rdp">GitHub</a></nav></div></header>
+<main class="container">
+<section class="hero">
+<div><div class="eyebrow">Seu projeto • GitHub + streaming</div><h1>Um espaço para o seu <span>PC gamer na nuvem.</span></h1><p class="lead">Organize um servidor gamer com Sunshine, controle o acesso privado com Tailscale e jogue pelo Moonlight. O GitHub cuida do projeto — o processamento dos jogos acontece em uma máquina com GPU que você deve disponibilizar.</p><div class="actions"><a class="btn primary" href="#etapas">Começar configuração →</a><a class="btn" href="https://github.com/hi831/pc-gamer-rdp/actions">Abrir GitHub Actions ↗</a></div></div>
+<div class="orbit" role="img" aria-label="Ilustração de um monitor virtual"><div class="monitor"><div class="screen"><div class="chip">STREAMING • PREPARAÇÃO</div><div class="windowline"></div><div class="windowline small"></div></div><div class="stand"></div></div></div>
+</section>
+<div class="notice"><strong>Estado real:</strong> a central está pronta para organizar a instalação, mas nenhum PC remoto, GPU ou jogo foi ativado por este site. O painel não transmite jogos diretamente nem cria um servidor gratuito ilimitado.</div>
+<section class="section" id="ferramentas"><div class="section-head"><div><h2>Os três componentes essenciais</h2><p class="sub">Aplicativos gratuitos de código aberto ou com plano gratuito; o computador hospedeiro pode ter custos.</p></div><span class="pill"><span class="dot"></span> Preparação disponível</span></div>
+<div class="cards">
+<article class="card"><div class="icon" aria-hidden="true">▣</div><h3>Sunshine · Servidor</h3><p>Captura e codifica a sessão do computador que realmente executará seus jogos.</p><a href="https://docs.lizardbyte.dev/projects/sunshine/latest/md_docs_2getting__started.html" target="_blank" rel="noopener">Instalação oficial ↗</a></article>
+<article class="card"><div class="icon" aria-hidden="true">◉</div><h3>Moonlight · Cliente</h3><p>Mostra a imagem do PC gamer no seu computador e transmite comandos de teclado e controle.</p><a href="https://moonlight-stream.org/" target="_blank" rel="noopener">Site oficial ↗</a></article>
+<article class="card"><div class="icon" aria-hidden="true">◇</div><h3>Tailscale · Rede privada</h3><p>Conecta seus dispositivos autorizados sem divulgar o painel Sunshine à internet pública.</p><a href="https://tailscale.com/docs/install/" target="_blank" rel="noopener">Guia oficial ↗</a></article>
+</div></section>
+<section class="section" id="etapas"><div class="section-head"><div><h2>Checklist para jogar</h2><p class="sub">Marque suas etapas. O progresso fica apenas neste navegador.</p></div><button class="btn" type="button" id="clear">Reiniciar checklist</button></div>
+<div class="grid2">
+<div class="panel"><div class="progress"><span>Seu progresso local</span><strong id="counter">0 de 5</strong></div><div class="track" role="progressbar" aria-label="Progresso de configuração" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="bar"><div class="fill" id="fill"></div></div>
+<label class="check"><input type="checkbox" data-check="1"><span><strong>Tenho um servidor autorizado com GPU</strong> e armazenamento para meus jogos (não é um runner GitHub-hosted).</span></label>
+<label class="check"><input type="checkbox" data-check="2"><span>Instalei <strong>Sunshine + Tailscale</strong> no servidor Windows e entrei na rede privada.</span></label>
+<label class="check"><input type="checkbox" data-check="3"><span>Configurei o Sunshine localmente, com senha forte, jogos e captura funcionando.</span></label>
+<label class="check"><input type="checkbox" data-check="4"><span>Instalei <strong>Moonlight + Tailscale</strong> no computador que usarei para jogar.</span></label>
+<label class="check"><input type="checkbox" data-check="5"><span>Fiz o pareamento por PIN no Moonlight e testei streaming inicial em 720p.</span></label>
+</div>
+<aside class="panel"><h3 style="margin-top:0">Guia em 3 movimentos</h3><div class="step"><span class="number">1</span><div><strong>Servidor</strong><p>Revise e execute o script de preparação no PC remoto autorizado.</p></div></div><div class="step"><span class="number">2</span><div><strong>Cliente</strong><p>Instale Moonlight e Tailscale no computador fraco.</p></div></div><div class="step"><span class="number">3</span><div><strong>Conexão</strong><p>Entre no Tailscale, pareie com PIN e inicie seu jogo no Moonlight.</p></div></div><a class="btn primary" style="margin-top:18px;width:100%" href="COMO-USAR.md">Ler o passo a passo →</a></aside>
+</div></section>
+<section class="section" id="diagnostico"><div class="section-head"><div><h2>GitHub Actions</h2><p class="sub">Dados públicos do desenvolvimento, não status de um servidor gamer.</p></div></div><div class="grid2"><div class="panel"><h3 style="margin-top:0">Último diagnóstico Windows</h3><div class="status"><strong id="ci-text">Consultando execuções públicas...</strong><span id="ci-date"></span></div><p style="color:var(--muted);font-size:14px;line-height:1.6">O diagnóstico verifica apenas o Windows temporário de testes do GitHub. Ele não instala jogos, não disponibiliza GPU e não cria sessão RDP.</p><a class="btn" href="https://github.com/hi831/pc-gamer-rdp/actions/workflows/diagnostico.yml">Ver logs e resumo ↗</a></div><div class="panel"><h3 style="margin-top:0">Precisa do PC gamer completo?</h3><p style="color:var(--muted);line-height:1.6;font-size:14px">Use um computador/VM externo com GPU e permissão para streaming. Acesse os scripts e confira a segurança antes de instalar.</p><div class="actions"><a class="btn" href="https://github.com/hi831/pc-gamer-rdp/tree/main/scripts/windows">Scripts ↗</a><a class="btn" href="SEGURANCA.md">Segurança ↗</a></div></div></div></section>
+</main><footer><div class="container foot"><span>PC Gamer Cloud • projeto comunitário no GitHub</span><span>Sem GPUs, VMs ou contas ativadas automaticamente.</span></div></footer>
+<script>
+(function(){
+'use strict';
+var checks=Array.from(document.querySelectorAll('input[data-check]'));
+var storageKey='pc-gamer-cloud-checklist-v1';
+try {var saved=JSON.parse(localStorage.getItem(storageKey)||'[]');checks.forEach(function(c){c.checked=saved.indexOf(c.dataset.check)!==-1;});}catch(e){}
+function refresh(){
+var done=checks.filter(function(c){return c.checked;}).length;
+document.getElementById('counter').textContent=done+' de '+checks.length;
+document.getElementById('fill').style.width=(100*done/checks.length)+'%';
+document.getElementById('bar').setAttribute('aria-valuenow',String(done));
+try{localStorage.setItem(storageKey,JSON.stringify(checks.filter(function(c){return c.checked;}).map(function(c){return c.dataset.check;})));}catch(e){}
+}
+checks.forEach(function(c){c.addEventListener('change',refresh);});
+document.getElementById('clear').addEventListener('click',function(){checks.forEach(function(c){c.checked=false;});refresh();});
+refresh();
+fetch('https://api.github.com/repos/hi831/pc-gamer-rdp/actions/workflows/diagnostico.yml/runs?per_page=1')
+.then(function(r){if(!r.ok)throw new Error('GitHub API indisponível');return r.json();})
+.then(function(data){var run=data.workflow_runs&&data.workflow_runs[0];var el=document.getElementById('ci-text');if(!run){el.textContent='Nenhuma execução encontrada';return;}var status=run.status==='completed'?(run.conclusion==='success'?'Teste concluído com sucesso':run.conclusion==='failure'?'Teste falhou':'Teste concluído: '+run.conclusion):'Execução: '+run.status;el.textContent=status;var date=new Date(run.created_at);document.getElementById('ci-date').textContent=isNaN(date.getTime())?'':date.toLocaleDateString('pt-BR');})
+.catch(function(){document.getElementById('ci-text').textContent='Status indisponível — confira a aba Actions';});
+})();
+</script>
+</body></html>

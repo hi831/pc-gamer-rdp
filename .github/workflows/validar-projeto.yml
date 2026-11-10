@@ -1,0 +1,51 @@
+name: Validar projeto cloud
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'README.md'
+      - 'docs/**'
+      - 'scripts/**'
+      - '.github/workflows/validar-projeto.yml'
+  pull_request:
+    paths:
+      - 'README.md'
+      - 'docs/**'
+      - 'scripts/**'
+      - '.github/workflows/validar-projeto.yml'
+permissions:
+  contents: read
+jobs:
+  validar:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Obter repositorio
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Validar sintaxe PowerShell
+        shell: pwsh
+        run: |
+          $bad = $false
+          Get-ChildItem scripts/windows -Filter '*.ps1' | ForEach-Object {
+            $tokens = $null
+            $issues = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$issues)
+            if ($issues.Count -gt 0) {
+              Write-Error ("Erro no script: " + $_.Name)
+              $issues | ForEach-Object { Write-Host $_.Message }
+              $bad = $true
+            } else {
+              Write-Host ("Sintaxe OK: " + $_.Name)
+            }
+          }
+          if ($bad) { exit 1 }
+      - name: Checar arquivos do projeto
+        shell: pwsh
+        run: |
+          $files = @('README.md','docs/index.html','docs/COMO-USAR.md','docs/SEGURANCA.md','scripts/windows/preparar-servidor.ps1','scripts/windows/preparar-cliente.ps1')
+          foreach ($file in $files) {
+            if (-not (Test-Path $file)) { throw ("Arquivo ausente: " + $file) }
+          }
+          Write-Host 'Estrutura do projeto OK'

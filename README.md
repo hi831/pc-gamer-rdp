@@ -1,137 +1,75 @@
-# PC Gamer Virtual Gratuito via GitHub Actions
+# PC Gamer Cloud — central de controle no GitHub
 
-Transforme o GitHub Actions em um **PC Gamer Virtual gratuito** com acesso via RDP (Remote Desktop Protocol). Este repositório configura automaticamente uma máquina Windows com otimizações de performance para gaming, instala software essencial e cria um túnel seguro para acesso remoto.
+> **Status atual:** painel, documentação, scripts e diagnóstico. **Não há PC gamer remoto ativado**. O GitHub Actions hospedado pelo GitHub **não é** um serviço de cloud gaming.
 
-## Especificações do PC Virtual
+Este fork organiza um projeto de streaming de jogos em um computador próprio ou VM **autorizada para jogos e com GPU**. Não precisa de placa de vídeo potente no computador cliente para renderizar os jogos: o servidor executa o jogo; o cliente recebe o vídeo. A compatibilidade do cliente, a qualidade de conexão e os termos do provedor continuam sendo requisitos.
 
-| Componente | Especificação |
-|---|---|
-| **CPU** | 4 vCPUs (Intel Xeon / AMD EPYC) |
-| **RAM** | 16 GB DDR4 |
-| **Armazenamento** | 14 GB SSD NVMe |
-| **Internet** | 1 - 10 Gbps (Azure Datacenter) |
-| **Sistema Operacional** | Windows Server 2025 (base Windows 11) |
-| **Duração Máxima** | 6 horas por sessão |
-| **Custo** | Gratuito (repositório público) |
+## Comece aqui
 
-## Software Instalado Automaticamente
+- [**Painel de configuração (docs/index.html)**](docs/index.html) — interface visual, checklists e atalhos.
+- [**Guia completo**](docs/COMO-USAR.md) — preparar servidor Windows e cliente.
+- [**Arquitetura**](docs/ARQUITETURA.md) — onde ficam CPU, GPU, disco e GitHub.
+- [**Segurança**](docs/SEGURANCA.md) — não publique credenciais ou portas de administração.
+- [**Executar diagnósticos existentes**](../../actions) — não ativam um PC gamer.
 
-| Software | Descrição |
-|---|---|
-| **Google Chrome** | Navegador web (opcional) |
-| **Steam** | Plataforma de jogos (opcional) |
-| **Epic Games Launcher** | Plataforma de jogos (opcional) |
-| **DirectX Runtime** | Bibliotecas gráficas essenciais |
-| **Visual C++ Redistributables** | Dependências para jogos |
-| **.NET Runtime 8.0** | Runtime para aplicações |
-| **7-Zip** | Compactador de arquivos |
+Para publicar o painel com endereço web, abra **Settings → Pages → Build and deployment → Deploy from a branch → main /docs → Save**. Depois de a publicação terminar, acesse https://hi831.github.io/pc-gamer-rdp/ . A publicação pode depender das configurações da conta e do repositório. O painel é estático: não acessa um PC real sozinho.
 
-## Otimizações Gaming Aplicadas
+## Componentes
 
-O workflow aplica automaticamente mais de **15 otimizações de performance**, incluindo:
+| Local | Função |
+| --- | --- |
+| GitHub | Armazena projeto, painel, scripts e valida código |
+| Servidor Windows/VM com GPU | Instala jogos e executa Sunshine |
+| Tailscale | Interliga cliente e servidor em uma rede privada |
+| Moonlight no cliente | Recebe áudio/vídeo e envia comandos |
+| Disco do servidor | Guarda jogos e saves; **não** é oferecido pelo GitHub |
 
-O **Windows Defender** em tempo real é desabilitado para liberar recursos de CPU que seriam consumidos pela verificação constante de arquivos. O **plano de energia** é configurado para Alta Performance, garantindo que o processador opere sempre na frequência máxima. Serviços desnecessários como Windows Search, Superfetch e Telemetria são desativados para liberar memória RAM e ciclos de CPU.
+## Scripts Windows
 
-No âmbito de rede, o **Nagle's Algorithm** é desabilitado para reduzir a latência de rede, e as configurações TCP são otimizadas para máximo throughput. A prioridade de processos em primeiro plano é aumentada para garantir que os jogos recebam a maior fatia de recursos do sistema.
+Em um Windows de servidor ou cliente que **você controla e está autorizado a usar**, baixe este repositório e execute no PowerShell:
 
-Para o RDP especificamente, o **H.264/AVC encoding** é habilitado para melhor qualidade de imagem, a taxa de frames é configurada para **60 FPS**, o transporte **UDP** é habilitado para menor latência, e o **RemoteFX** é ativado para aceleração de hardware.
+```powershell
+# No computador servidor (executar primeiro sem -Apply para revisar)
+.\scripts\windows\preparar-servidor.ps1
+# Só após confirmar que a máquina é sua/autorizada:
+.\scripts\windows\preparar-servidor.ps1 -Apply -Steam
 
-## Pré-requisitos
+# No computador fraco (cliente)
+.\scripts\windows\preparar-cliente.ps1
+.\scripts\windows\preparar-cliente.ps1 -Apply
 
-Antes de começar, você precisará de duas coisas:
+# Checar CPU, GPU, RAM e programas no servidor
+.\scripts\windows\diagnostico-gamer.ps1
+```
 
-1. **Conta no GitHub** (gratuita): [github.com](https://github.com)
-2. **Conta no Ngrok** (gratuita): [ngrok.com](https://ngrok.com)
+**O parâmetro `-Apply` é explícito**: sem ele os instaladores não são executados. O script usa IDs oficiais de pacotes Winget e não solicita senhas, não desativa Defender e não expõe RDP ou portas à internet.
 
-## Guia de Configuração Passo a Passo
+Depois de instalar, é necessário entrar na conta Tailscale em cada máquina, criar credenciais do Sunshine localmente, adicionar o PC ao Moonlight e fazer o pareamento com PIN. Nenhuma credencial é guardada no GitHub.
 
-### Passo 1: Criar Conta no Ngrok
+## Workflows
 
-Acesse [dashboard.ngrok.com/signup](https://dashboard.ngrok.com/signup) e crie uma conta gratuita. Após o login, copie seu **Authtoken** na página [dashboard.ngrok.com/get-started/your-authtoken](https://dashboard.ngrok.com/get-started/your-authtoken).
+- **Diagnostico Windows**: identifica recursos do runner temporário do GitHub, apenas para desenvolvimento.
+- **Teste do GitHub Actions**: verifica que Actions funciona.
+- **Validar projeto cloud**: verifica arquivos e sintaxe dos scripts PowerShell.
+- **Diagnostico GPU (runner proprio)**: **somente** para um runner de propriedade do usuário, configurado em repositório privado, com label `gaming`. Não instala programas nem cria túneis. Na configuração pública atual, esse job é ignorado de propósito.
 
-### Passo 2: Fazer Fork deste Repositório
+## O que ainda falta para jogar
 
-Clique no botão **Fork** no canto superior direito desta página para criar uma cópia do repositório na sua conta. O repositório deve ser **público** para ter minutos ilimitados de GitHub Actions.
+1. Um PC/VM real com GPU, permissões de uso e capacidade de codificar vídeo.
+2. Armazenamento e rede adequados nesse servidor (eventuais custos são do provedor).
+3. Instalar Sunshine + Tailscale no servidor, Moonlight + Tailscale no cliente, autenticar e parear.
+4. Instalar e configurar jogos que você tem direito de usar.
 
-### Passo 3: Configurar o Secret do Ngrok
+**Não há como cumprir (1) ou (2) apenas adicionando arquivos a um repositório.** Runners GitHub-hosted não têm GPU gamer padrão nem persistência de armazenamento e são destinados a CI/CD. O upstream original contém apenas README e LICENSE; sua promessa de RDP não está implementada nele.
 
-No seu repositório (fork), siga estes passos:
+## Links oficiais
 
-1. Vá em **Settings** (Configurações)
-2. No menu lateral, clique em **Secrets and variables** e depois em **Actions**
-3. Clique em **New repository secret**
-4. No campo **Name**, digite: `NGROK_AUTH_TOKEN`
-5. No campo **Secret**, cole seu Authtoken do Ngrok
-6. Clique em **Add secret**
-
-### Passo 4: Executar o Workflow
-
-1. Vá na aba **Actions** do seu repositório
-2. No menu lateral, clique em **"PC Gamer Virtual - Windows RDP"**
-3. Clique em **"Run workflow"**
-4. Configure as opções desejadas (senha, software para instalar)
-5. Clique em **"Run workflow"** (botão verde)
-
-### Passo 5: Obter o Endereço de Conexão
-
-1. Clique no workflow em execução
-2. Clique no job **"PC Gamer Virtual RDP"**
-3. Aguarde até o passo **"Informações Finais e Iniciar Túnel RDP"**
-4. O endereço TCP do ngrok aparecerá no log, no formato: `tcp://X.tcp.ngrok.io:XXXXX`
-5. Anote o endereço (exemplo: `0.tcp.ngrok.io:12345`)
-
-### Passo 6: Conectar via RDP
-
-**No Windows:**
-1. Pressione `Win + R` e digite `mstsc`
-2. No campo "Computador", digite o endereço do ngrok (ex: `0.tcp.ngrok.io:12345`)
-3. Clique em **Conectar**
-4. Usuário: `runneradmin`
-5. Senha: a que você definiu no workflow
-
-**No Mac:**
-1. Baixe o **Microsoft Remote Desktop** na App Store
-2. Clique em **Add PC**
-3. Cole o endereço do ngrok
-4. Conecte com as credenciais
-
-**No Android/iOS:**
-1. Baixe o app **RD Client** (Microsoft Remote Desktop)
-2. Adicione um novo PC com o endereço do ngrok
-3. Conecte com as credenciais
-
-## Dicas para Melhor Performance
-
-Para obter a melhor experiência possível ao usar o RDP para gaming, considere as seguintes recomendações:
-
-A **qualidade da sua conexão de internet** é o fator mais importante. Uma conexão estável com pelo menos 10 Mbps de download é recomendada. Conexões via cabo Ethernet são preferíveis ao Wi-Fi para reduzir a latência.
-
-Nas configurações do cliente RDP, ajuste a **qualidade de exibição** conforme sua conexão. Para conexões mais lentas, reduza a resolução para 1280x720. Para conexões rápidas, use 1920x1080 com 32-bit de cor.
-
-Jogos que não dependem de reflexos rápidos (como RPGs, estratégia, simuladores e jogos de turno) funcionam melhor via RDP do que jogos competitivos de FPS que exigem latência ultra-baixa.
-
-## Limitações Importantes
-
-| Limitação | Detalhe |
-|---|---|
-| **Duração** | Máximo de 6 horas por sessão |
-| **GPU** | Sem GPU dedicada (renderização por CPU) |
-| **Armazenamento** | 14 GB total (limitado para jogos grandes) |
-| **Latência** | Depende da sua conexão e localização |
-| **Uso** | GitHub pode restringir uso abusivo |
-
-> **Aviso:** Este método utiliza recursos do GitHub Actions de forma não convencional. Use com moderação e responsabilidade. O uso excessivo pode resultar em restrições na sua conta GitHub. Este guia é apenas para fins educacionais.
-
-## Solução de Problemas
-
-**O workflow não inicia:** Verifique se o repositório é público e se o secret `NGROK_AUTH_TOKEN` está configurado corretamente.
-
-**Não consigo conectar via RDP:** Verifique se o endereço do ngrok está correto e se o túnel ainda está ativo. O endereço muda a cada execução.
-
-**Conexão lenta ou travando:** Reduza a resolução do RDP para 1280x720 e desabilite efeitos visuais no cliente RDP.
-
-**Ngrok mostra erro de autenticação:** Gere um novo authtoken no dashboard do ngrok e atualize o secret no GitHub.
+- Sunshine: https://docs.lizardbyte.dev/projects/sunshine/latest/md_docs_2getting__started.html
+- Moonlight: https://moonlight-stream.org/
+- Tailscale: https://tailscale.com/docs/install/
+- GitHub Actions: https://docs.github.com/en/actions
+- Política do Actions: https://docs.github.com/en/site-policy/github-terms/github-terms-for-additional-products-and-features
 
 ## Licença
 
-Este projeto é distribuído sob a licença MIT. Consulte o arquivo LICENSE para mais detalhes.
+MIT. Consulte [LICENSE](LICENSE). Este fork deriva do repositório original [victorhugomedeiros111111-oss/pc-gamer-rdp](https://github.com/victorhugomedeiros111111-oss/pc-gamer-rdp).

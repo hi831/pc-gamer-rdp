@@ -1,0 +1,27 @@
+name: Diagnostico GPU (runner proprio)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gpu:
+    # Runners proprios em repositorios publicos apresentam riscos.
+    # O job e intencionalmente ignorado enquanto o repo for publico.
+    if: ${{ github.event.repository.private == true }}
+    runs-on: [self-hosted, windows, x64, gaming]
+    timeout-minutes: 5
+    steps:
+      - name: Somente leitura do hardware
+        shell: pwsh
+        run: |
+          '## Servidor gamer autorizado' >> $env:GITHUB_STEP_SUMMARY
+          $gpu = @(Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name)
+          $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty Name
+          $ram = [Math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1)
+          ('CPU: ' + $cpu) | Tee-Object -Variable cpuInfo
+          ('GPU: ' + ($gpu -join ', '))
+          ('RAM: ' + $ram + ' GiB')
+          ('CPU: ' + $cpu) >> $env:GITHUB_STEP_SUMMARY
+          ('GPU: ' + ($gpu -join ', ')) >> $env:GITHUB_STEP_SUMMARY
+          ('RAM: ' + $ram + ' GiB') >> $env:GITHUB_STEP_SUMMARY
+          'Este workflow nao cria VM, nao instala aplicativos nem habilita acesso remoto.' >> $env:GITHUB_STEP_SUMMARY
