@@ -7,8 +7,6 @@ on:
 jobs:
   diagnostico:
     runs-on: windows-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
     timeout-minutes: 10
     permissions:
       contents: read
@@ -29,9 +27,10 @@ jobs:
           "Discos:" | Out-File relatorios/ambiente.txt -Append
           Get-PSDrive -PSProvider FileSystem | Select-Object Name,Used,Free | Format-Table | Out-String | Out-File relatorios/ambiente.txt -Append
           Get-Content relatorios/ambiente.txt
-      - name: Publicar relatorio
-        uses: actions/upload-artifact@v4
-        with:
-          name: diagnostico-windows
-          path: relatorios/ambiente.txt
-          retention-days: 7
+      - name: Exibir relatorio no resumo da execucao
+        shell: pwsh
+        run: |
+          '## Diagnostico do runner Windows' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          '```text' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          Get-Content relatorios/ambiente.txt | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          '```' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
